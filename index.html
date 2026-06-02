@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đua Xe Đạp 3D - Vật Lý Tiếp Đất & Cổng Checkpoint</title>
+    <style>
+        body {
+            margin: 0; padding: 0; overflow: hidden;
+            background-color: #050505; font-family: 'Arial', sans-serif;
+            user-select: none; color: #fff;
+        }
+
+        /* HUD hiển thị thông số */
+        #hud {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(10, 15, 30, 0.85);
+            padding: 15px 25px; border-radius: 15px;
+            border: 2px solid #38bdf8; pointer-events: none; z-index: 10;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); display: none;
+        }
+        .hud-line { margin: 5px 0; font-weight: bold; font-size: 16px; }
+        #speed { color: #38bdf8; }
+        #level { color: #f472b6; }
+        #distance { color: #fbbf24; }
+        #height-hud { color: #22c55e; }
+
+        /* Cảnh báo Checkpoint và Té Ngã */
+        #alert-text {
+            position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 26px; font-weight: bold; background: rgba(0,0,0,0.85); 
+            padding: 12px 35px; border-radius: 12px; display: none; 
+            pointer-events: none; z-index: 11; text-align: center;
+        }
+
+        #controls-guide {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.8); font-size: 13px;
+            background: rgba(0, 0, 0, 0.8); padding: 8px 25px; border-radius: 20px; 
+            text-align: center; pointer-events: none; z-index: 10;
+            border: 1px solid rgba(255,255,255,0.2); display: none; line-height: 1.4;
+        }
+
+        /* Khung giao diện Menu chính */
+        .screen-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0f172a, #020617);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100; overflow-y: auto; padding: 20px; box-sizing: border-box;
+        }
+        .menu-box {
+            background: rgba(15, 23, 42, 0.95); border: 2px solid #38bdf8;
+            padding: 30px; border-radius: 24px; text-align: center;
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);
+            max-width: 600px; width: 100%; backdrop-filter: blur(10px);
+        }
+        h1 { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); margin-top: 0; font-size: 26px; }
+        h3 { color: #f472b6; margin: 20px 0 8px 0; text-align: left; font-size: 15px; border-left: 4px solid #f472b6; padding-left: 8px; }
+
+        /* Thẻ hiển thị Garage chọn xe */
+        .garage-container { display: flex; gap: 12px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
+        .bike-card {
+            background: #1e293b; border: 1px solid #334155; border-radius: 14px;
+            padding: 12px; cursor: pointer; transition: 0.2s; flex: 1; min-width: 150px; text-align: left;
+        }
+        .bike-card.active {
+            background: rgba(56, 189, 248, 0.15); border-color: #38bdf8;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+        }
+        .bike-name { font-weight: bold; font-size: 14px; margin-bottom: 4px; display: flex; justify-content: space-between; }
+        .bike-desc { font-size: 11px; color: #94a3b8; margin-bottom: 8px; height: 32px; line-height: 1.3; }
+        .stat-bar-bg { background: #334155; height: 5px; border-radius: 3px; margin-top: 3px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; border-radius: 3px; }
+        .stat-label { font-size: 10px; color: #cbd5e1; margin-top: 4px; }
+
+        /* Lưới chọn màn chơi */
+        .shortcut-row { display: flex; gap: 8px; margin-bottom: 12px; }
+        .btn-shortcut {
+            flex: 1; background: #0f172a; border: 1px dashed #475569; color: #94a3b8;
+            padding: 8px; font-size: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        .btn-shortcut.unlocked { border-style: solid; border-color: #fbbf24; color: #fbbf24; background: rgba(251, 191, 36, 0.05); }
+
+        .level-grid { display: grid; grid-template-columns: repeat(10, 1fr); grid-gap: 6px; margin-bottom: 15px; }
+        .btn-level {
+            background: #1e293b; color: #fff; border: 1px solid #475569;
+            height: 35px; border-radius: 8px; font-weight: bold; font-size: 13px;
+            cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center;
+        }
+        .btn-level.locked { background: #0f172a; color: #475569; border-color: #1e293b; cursor: not-allowed; font-size: 10px; }
+        .btn-level.active { background: #f472b6; border-color: #f472b6; box-shadow: 0 0 8px rgba(244, 114, 182, 0.4); }
+
+        .btn-main {
+            background: linear-gradient(90deg, #f472b6, #38bdf8); color: white;
+            border: none; padding: 14px; font-size: 18px; font-weight: bold;
+            border-radius: 14px; cursor: pointer; margin-top: 15px; width: 100%;
+            box-shadow: 0 4px 15px rgba(244, 114, 182, 0.3); transition: 0.2s;
+        }
+        .btn-main:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(56, 189, 248, 0.5); }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <div id="hud">
+        <div class="hud-line">🏁 MÀN CHƠI: <span id="level">1</span>/30</div>
+        <div class="hud-line">🚀 TỐC ĐỘ: <span id="speed">0</span> km/h</div>
+        <div class="hud-line">📍 CÒN LẠI: <span id="distance">0</span>m</div>
+        <div class="hud-line">⛰️ ĐỘ CAO: <span id="height-hud">0</span>m</div>
+    </div>
+    <div id="alert-text"></div>
+    <div id="controls-guide">
+        Di chuyển: <b>W/S/A/D</b> hoặc <b>Phím Mũi Tên</b><br>
+        Trên không: Nhấn <b>W/S</b> (Mũi tên Lên/Xuống) để cân bằng góc bánh xe khi tiếp đất dốc!
+    </div>
+
+    <div id="menuOverlay" class="screen-overlay">
+        <div class="menu-box">
+            <h1>🚲 DOWNHILL BIKE 3D - PRO CHALLENGE 🚲</h1>
+            <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Mô phỏng vật lý dốc nhấp nhô và kỹ thuật tiếp đất chống lật xe đạp!</p>
+
+            <h3>🛠️ GARAGE CHỌN XE & THÔNG SỐ CHUYÊN DỤNG:</h3>
+            <div class="garage-container">
+                <div class="bike-card active" id="card-pink" onclick="selectBike('pink', 0.9, 0.015, 0.07)">
+                    <div class="bike-name">Pink Neon 🌸 <span style="color:#f472b6;font-size:11px;">Cân Bằng</span></div>
+                    <div class="bike-desc">Khung hợp kim dẻo, trọng tâm thấp giúp xe cực khó lật khi tiếp đất sai góc độ dốc. Phù hợp tập lái.</div>
+                    <div class="stat-label">Tốc độ tối đa (90)</div>
+                    <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: 55%; background:#38bdf8;"></div></div>
+                    <div class="stat-label">Độ đầm thăng bằng (Cao)</div>
+                    <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: 90%; background:#a78bfa;"></div></div>
+                </div>
+                <div class="bike-card" id="card-yellow" onclick="selectBike('yellow', 1.2, 0.022, 0.09)">
+                    <div class="bike-name">Volt Yellow ⚡ <span style="color:#eab308;font-size:11px;">Bứt Tốc</span></div>
+                    <div class="bike-desc">Trọng lượng siêu nhẹ giúp xe bay cực cao và xa khi qua đỉnh dốc, nhưng rẽ lái sẽ rất nhạy.</div>
+                    <div class="stat-label">Tốc độ tối đa (120)</div>
+                    <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: 75%; background:#38bdf8;"></div></div>
+                    <div class="stat-label">Độ đầm thăng bằng (Vừa)</div>
+                    <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: 55%; background:#a78bfa;"></div></div>
+                </div>
+                <div class="bike-card" id="card-cyan" onclick="selectBike('cyan', 1.5, 0.012, 0.06)">
+                    <div class="bike-name">Cyan Pulse 🌌 <span style="color:#06b6d4;font-size:11px;">Địa Hình</span></div>
+                    <div class="bike-desc">Phuộc nhún dầu cỡ lớn hấp thụ xung lực tiếp đất hoàn hảo, giữ vận tốc trôi đường dốc cực đỉnh.</div>
+                    <div class="stat-label">Tốc độ tối đa (150)</div>
+                    <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: 100%; background:#38bdf8;"></div></div>
+                    <div class="stat-label">Độ đầm thăng bằng (Rất Tốt)</div>
+                    <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: 80%; background:#a78bfa;"></div></div>
+                </div>
+            </div>
+
+            <h3>⚡ LỐI TẮT NHANH ĐẾN CÁC CHẶNG ĐỊA HÌNH CỐ ĐỊNH:</h3>
+            <div class="shortcut-row">
+                <button id="short-1" class="btn-shortcut unlocked" onclick="jumpToStage(1)">🌌 1-10: Tốc Độ (Vũ Trụ)</button>
+                <button id="short-11" class="btn-shortcut" onclick="jumpToStage(11)">🌲 11-20: Cua Rẽ (Rừng Đêm)</button>
+                <button id="short-21" class="btn-shortcut" onclick="jumpToStage(21)">🌋 21-30: Sinh Tồn (Núi Lửa)</button>
+            </div>
+
+            <h3>🧩 BẢNG CHỌN MÀN CHƠI:</h3>
+            <div class="level-grid" id="levelGrid"></div>
+
+            <button class="btn-main" onclick="startRaceNow()">BẮT ĐẦU ĐỔ ĐÈO 🏁</button>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, playerBike, finishGate;
+        let obstacles = [];
+        let checkpoints = [];
+        
+        // Quản lý vị trí checkpoint hồi sinh (Toại độ X, Y, Z)
+        let respawnX = 0, respawnY = 0, respawnZ = 0;
+
+        let maxUnlockedLevel = 1; 
+        let selectedLevel = 1;    
+        
+        let bikeColorType = 'pink';
+        let maxSpeed = 0.9;
+        let acceleration = 0.015;
+        let turnSpeed = 0.07;
+        
+        let currentTerrainMode = 'cyber';
+        let currentSkyColor = 0x0a0f1d;
+
+        // Trạng thái vận hành game
+        let gameState = "MENU";
+        let speed = 0;
+        const deceleration = 0.008;
+        const trackWidth = 14;
+        let trackLength = 600;
+
+        // Cơ học vật lý dốc và nhảy trên không
+        let bikeVelocityY = 0;
+        const gravity = 0.008;
+        let isAirborne = false;
+
+        const keys = { w: false, s: false, a: false, d: false, arrowup: false, arrowdown: false, arrowleft: false, arrowright: false };
+
+        loadProgress();
+        updateMenuGfx();
+
+        function loadProgress() {
+            const savedLevel = localStorage.getItem('y8_bike_v4_progress');
+            if (savedLevel) { maxUnlockedLevel = Math.min(30, parseInt(savedLevel)); selectedLevel = maxUnlockedLevel; }
+        }
+        function saveProgress(levelPassed) {
+            if (levelPassed >= maxUnlockedLevel && levelPassed < 30) { maxUnlockedLevel = levelPassed + 1; localStorage.setItem('y8_bike_v4_progress', maxUnlockedLevel); }
+        }
+
+        function updateMenuGfx() {
+            const grid = document.getElementById("levelGrid"); grid.innerHTML = "";
+            for (let i = 1; i <= 30; i++) {
+                const btn = document.createElement("button"); btn.innerText = i;
+                if (i > maxUnlockedLevel) { btn.className = "btn-level locked"; btn.innerText = "🔒"; btn.disabled = true; }
+                else { btn.className = (i === selectedLevel) ? "btn-level active" : "btn-level"; btn.onclick = () => { selectedLevel = i; updateMenuGfx(); }; }
+                grid.appendChild(btn);
+            }
+            const s11 = document.getElementById("short-11"), s21 = document.getElementById("short-21");
+            if (maxUnlockedLevel >= 11) s11.classList.add("unlocked"); else s11.classList.remove("unlocked");
+            if (maxUnlockedLevel >= 21) s21.classList.add("unlocked"); else s21.classList.remove("unlocked");
+        }
+
+        function selectBike(type, mSpeed, accel, tSpeed) {
+            bikeColorType = type; maxSpeed = mSpeed; acceleration = accel; turnSpeed = tSpeed;
+            ['pink', 'yellow', 'cyan'].forEach(t => document.getElementById('card-' + t).classList.remove('active'));
+            document.getElementById('card-' + type).classList.add('active');
+        }
+
+        function jumpToStage(targetLevel) {
+            if (maxUnlockedLevel >= targetLevel) { selectedLevel = targetLevel; updateMenuGfx(); }
+            else { alert("🔒 Vui lòng vượt các màn trước để mở khóa chặng địa hình này!"); }
+        }
+
+        function configureEnvironmentByLevel() {
+            if (selectedLevel <= 10) { currentTerrainMode = 'cyber'; currentSkyColor = 0x0a0f1d; }
+            else if (selectedLevel <= 20) { currentTerrainMode = 'forest'; currentSkyColor = 0x02140a; }
+            else { currentTerrainMode = 'volcano'; currentSkyColor = 0x240804; }
+        }
+
+        // THUẬT TOÁN TÍNH TOÁN ĐỘ CAO MẶT ĐƯỜNG DỐC TẠI TOẠ ĐỘ Z BẤT KỲ
+        function getTrackHeightAt(zPos) {
+            // Xe chưa đi tới hoặc ra khỏi đường đua
+            if (zPos > 0 || zPos < -trackLength) return 0;
+            
+            // Chặng 1 đường ít dốc, Chặng 2 và Chặng 3 dốc nhấp nhô ngắt quãng gắt hơn nhiều
+            let waveFreq = 0.03;
+            let waveAmp = 1.8;
+            if (currentTerrainMode === 'forest') { waveFreq = 0.04; waveAmp = 3.0; }
+            if (currentTerrainMode === 'volcano') { waveFreq = 0.05; waveAmp = 4.2; }
+
+            // Sử dụng hàm sin lượng giác để tạo các dốc hình ngọn sóng uốn lượn mượt mà
+            return Math.sin(zPos * waveFreq) * waveAmp;
+        }
+
+        // Tính góc nghiêng lý thuyết của mặt dốc tại tọa độ Z (đạo hàm góc dốc)
+        function getTrackSlopeAngleAt(zPos) {
+            let zDelta = 0.5;
+            let h1 = getTrackHeightAt(zPos + zDelta);
+            let h2 = getTrackHeightAt(zPos - zDelta);
+            return Math.atan2(h2 - h1, zDelta * 2);
+        }
+
+        function init3D() {
+            if (renderer) return;
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(15, 30, 10); dirLight.castShadow = true; scene.add(dirLight);
+
+            window.addEventListener('keydown', e => { let k = e.key.toLowerCase(); if (k in keys) keys[k] = true; });
+            window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // HÀM TẠO MÔ HÌNH CỔNG CHÀO 3D (GATE)
+        function create3DGate(gateColor) {
+            const gateGroup = new THREE.Group();
+            const postGeo = new THREE.CylinderGeometry(0.15, 0.2, 5, 8);
+            const postMat = new THREE.MeshStandardMaterial({ color: gateColor, roughness: 0.5 });
+            
+            const leftPost = new THREE.Mesh(postGeo, postMat); leftPost.position.set(-trackWidth/2 + 0.6, 2.5, 0); gateGroup.add(leftPost);
+            const rightPost = leftPost.clone(); rightPost.position.x = trackWidth/2 - 0.6; gateGroup.add(rightPost);
+
+            const topGeo = new THREE.BoxGeometry(trackWidth - 1, 0.4, 0.4);
+            const topBar = new THREE.Mesh(topGeo, postMat); topBar.position.set(0, 5, 0); gateGroup.add(topBar);
+
+            return gateGroup;
+        }
+
+        function buildTrack() {
+            obstacles.forEach(obs => scene.remove(obs)); obstacles = [];
+            checkpoints.forEach(cp => scene.remove(cp.mesh)); checkpoints = [];
+            if (finishGate) scene.remove(finishGate);
+            if (playerBike) scene.remove(playerBike);
+
+            configureEnvironmentByLevel();
+            respawnX = 0; respawnY = getTrackHeightAt(0); respawnZ = 0;
+
+            scene.background = new THREE.Color(currentSkyColor);
+            scene.fog = new THREE.FogExp2(currentSkyColor, 0.012);
+
+            trackLength = 500 + selectedLevel * 50;
+
+            // DỰNG MẶT ĐƯỜNG THEO ĐỘ CAO NHẤP NHÔ (Mô phỏng dốc bằng ghép các phân đoạn nhỏ)
+            const segmentLength = 2;
+            const totalSegments = Math.ceil(trackLength / segmentLength);
+            
+            let trackColor = 0x1e293b;
+            if (currentTerrainMode === 'forest') trackColor = 0x14241a;
+            if (currentTerrainMode === 'volcano') trackColor = 0x1f1210;
+
+            const roadGroup = new THREE.Group();
+            for (let i = 0; i < totalSegments; i++) {
+                const z1 = -i * segmentLength;
+                const z2 = -(i + 1) * segmentLength;
+                const h1 = getTrackHeightAt(z1);
+                const h2 = getTrackHeightAt(z2);
+
+                const segGeo = new THREE.BoxGeometry(trackWidth, 0.5, segmentLength + 0.1);
+                const segMat = new THREE.MeshStandardMaterial({ color: trackColor, roughness: 0.8 });
+                const segMesh = new THREE.Mesh(segGeo, segMat);
+
+                // Đặt vị trí phân đoạn và xoay nghiêng theo dốc sin
+                segMesh.position.set(0, (h1 + h2) / 2 - 0.25, (z1 + z2) / 2);
+                segMesh.rotation.x = Math.atan2(h2 - h1, segmentLength);
+                segMesh.receiveShadow = true;
+                roadGroup.add(segMesh);
+
+                // Vẽ vạch kẻ đường Neon phong cách Y8 thích ứng theo dốc
+                if (i % 8 === 0) {
+                    const lineGeo = new THREE.PlaneGeometry(0.3, 4);
+                    let neonColor = 0x38bdf8;
+                    if (currentTerrainMode === 'forest') neonColor = 0x22c55e;
+                    if (currentTerrainMode === 'volcano') neonColor = 0xf97316;
+                    const lineMat = new THREE.MeshBasicMaterial({ color: neonColor, side: THREE.DoubleSide });
+                    const line = new THREE.Mesh(lineGeo, lineMat);
+                    line.rotation.x = Math.PI / 2;
+                    line.position.set(0, 0.28, 0);
+                    segMesh.add(line);
+                }
+            }
+            scene.add(roadGroup);
+
+            // --- TẠO CÁC CỔNG CHÀO CHECKPOINT 3D (MÀU VÀNG) ---
+            for (let cpZ = -150; cpZ > -trackLength + 100; cpZ -= 150) {
+                const gate = create3DGate(0xfbbf24); // Khởi tạo cổng màu vàng nhạt
+                let gateY = getTrackHeightAt(cpZ);
+                gate.position.set(0, gateY, cpZ);
+                gate.rotation.x = getTrackSlopeAngleAt(cpZ);
+                scene.add(gate);
+                checkpoints.push({ mesh: gate, xPos: 0, yPos: gateY, zPos: cpZ, triggered: false });
+            }
+
+            // --- TẠO CỔNG CHÀO ĐÍCH ĐẾN ĐẶC BIỆT (XANH LÁ) ---
+            finishGate = create3DGate(0x4ade80);
+            let endY = getTrackHeightAt(-trackLength + 5);
+            finishGate.position.set(0, endY, -trackLength + 5);
+            finishGate.rotation.x = getTrackSlopeAngleAt(-trackLength + 5);
+            // Phóng to cổng đích cho hoành tráng
+            finishGate.scale.set(1.1, 1.2, 1.1);
+            scene.add(finishGate);
+
+            // --- DỰNG MÔ HÌNH XE ĐẠP 3D ---
+            playerBike = new THREE.Group();
+            let hexColor = 0xf472b6;
+            if (bikeColorType === 'yellow') hexColor = 0xeab308;
+            if (bikeColorType === 'cyan') hexColor = 0x06b6d4;
+
+            const frameMat = new THREE.MeshStandardMaterial({ color: hexColor });
+            const frame = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 1.2), frameMat); frame.position.y = 0.5; playerBike.add(frame);
+
+            const wheelMat = new THREE.MeshStandardMaterial({ col
