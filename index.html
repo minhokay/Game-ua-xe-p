@@ -45,7 +45,6 @@
         }
         .btn-bike.active { border-color: #00f0ff; background: rgba(0, 240, 255, 0.15); color: #00f0ff; }
 
-        /* Nút Play chủ động nằm ở góc dưới bên phải */
         .play-panel { display: flex; justify-content: flex-end; margin-top: 15px; width: 100%; }
         .btn-play-active {
             background: linear-gradient(90deg, #10b981, #06b6d4); color: white;
@@ -163,9 +162,9 @@
         let gameState = "MENU"; let bikeColorType = "pink";
         let selectedLevel = null; let maxUnlockedLevel = 1;
         
-        let speed = 0; let maxSpeed = 1.05; // Giảm tốc độ đôi chút cho xe đầm chuẩn xe đạp đua
+        let speed = 0; let maxSpeed = 1.05; 
         const acceleration = 0.018; const deceleration = 0.007; const brakeForce = 0.045;
-        const trackWidth = 13; const trackLength = 50000; // Đường đua rút gọn xuống 50km
+        const trackWidth = 13; const trackLength = 50000; 
         
         let bikeVelocityY = 0; const gravity = 0.0085;
         let isAirborne = false; let isDead = false;
@@ -173,7 +172,6 @@
         let inputGas = false, inputBrake = false, inputLeft = false, inputRight = false;
         let roadSegments = []; const segmentLength = 2; const renderDistance = 75;
 
-        // KHÔNG GIAN BẦU TRỜI Gradient SÁNG SỦA, PHÙ HỢP TÊN CHẶNG
         const stageConfigs = {
             1: { name: "Neon Blue Sky", skyColor: 0xa5f3fc, fogColor: 0xe0f2fe, roadColor: 0x1e3a8a, lineColor: 0x00f0ff, rBarColor: 0x38bdf8, freq: 0.035, amp: 2.2 },
             2: { name: "Cyber Purple Sunset", skyColor: 0xf5d0fe, fogColor: 0xfae8ff, roadColor: 0x581c87, lineColor: 0xff00ff, rBarColor: 0xc084fc, freq: 0.048, amp: 3.4 },
@@ -215,7 +213,6 @@
         function selectLevelIdx(lvl) {
             selectedLevel = lvl;
             renderLevelGrids();
-            // Hiện nút Play chủ động tương ứng với màn đã chọn ở góc dưới phải
             const playBtn = document.getElementById("mainPlayBtn");
             playBtn.innerText = `VÀO TRẬN MÀN ${lvl} ⪢`;
             playBtn.style.display = "block";
@@ -260,7 +257,7 @@
             const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.08, 20);
             const wheelMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
             const backWheel = new THREE.Mesh(wheelGeo, wheelMat); backWheel.rotation.z = Math.PI / 2; backWheel.position.set(0, 0.4, -0.55); group.add(backWheel);
-            const frontWheel = backWheel.clone(); frontWheel.position.set( frontWheel.position.x, 0.4, 0.55); group.add(frontWheel);
+            const frontWheel = backWheel.clone(); frontWheel.position.set(frontWheel.position.x, 0.4, 0.55); group.add(frontWheel);
 
             const handleBar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.8, 8), ironMat); handleBar.position.set(0, 1.05, 0.45); group.add(handleBar);
 
@@ -316,6 +313,11 @@
             let st = getStageOfLevel(selectedLevel); let conf = stageConfigs[st];
             let startSegmentIdx = Math.floor(Math.abs(currentZ) / segmentLength);
             
+            // LOGIC PHÂN CẤP ĐỘ KHÓ TUYẾN TÍNH THEO MÀN (LEVEL)
+            let lvlFactor = selectedLevel / 30; // Từ 0.03 đến 1.0
+            let obstacleSpawnChance = 0.28 + (lvlFactor * 0.25); // Tần suất xuất hiện tăng dần (Màn cao dày đặc hơn)
+            let rampHeightScale = Math.max(0.4, 1.1 - (lvlFactor * 0.6)); // Chiều cao dốc phóng giảm mạnh ở màn cao
+
             for (let i = startSegmentIdx; i < startSegmentIdx + renderDistance; i++) {
                 let z1 = -i * segmentLength; if (z1 < -trackLength) break;
                 
@@ -331,14 +333,21 @@
                     let objectAttached = null; let objectType = "none";
                     if (i > 12 && i % 4 === 0) {
                         let rand = Math.random();
-                        if (rand < 0.35) { // Dốc phóng cao rực rỡ
-                            objectAttached = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.1, 4.0), new THREE.MeshStandardMaterial({ color: 0x22c55e }));
-                            objectAttached.position.set((Math.random() - 0.5) * (trackWidth - 4), 0.35, 0);
+                        if (rand < 0.25) { 
+                            // 🚀 DỐC PHÓNG GIẢM ĐỘ CAO KHI LÊN MÀN CAO (YÊU CẦU 3)
+                            objectAttached = new THREE.Mesh(new THREE.BoxGeometry(2.8, rampHeightScale, 4.0), new THREE.MeshStandardMaterial({ color: 0x22c55e }));
+                            objectAttached.position.set((Math.random() - 0.5) * (trackWidth - 4), rampHeightScale / 2, 0);
                             objectAttached.rotation.x = -Math.PI / 8; segMesh.add(objectAttached); objectType = "ramp";
-                        } else if (rand < 0.82) { // 🛑 VẬT CẢN ĂN SÁT RA KHÍT MÉP ĐƯỜNG ĐUA CHỐNG ĂN GIAN
-                            objectAttached = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.4, 1.8), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
-                            let posX = (Math.random() > 0.5) ? (trackWidth / 2 - 1.2) : (-trackWidth / 2 + 1.2); 
-                            if (Math.random() < 0.3) posX = (Math.random() - 0.5) * (trackWidth - 3);
+                        } else if (rand < obstacleSpawnChance) { 
+                            // 🛑 SẮP XẾP VẬT CẢN ĂN SÁT MÉP ĐƯỜNG, ĐA DẠNG THẾ TRẬN THEO MÀN (YÊU CẦU 1 & 2)
+                            objectAttached = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.4, 1.8), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+                            let posX = 0;
+                            if (selectedLevel > 15 && Math.random() < 0.5) {
+                                // Màn cao xếp chướng ngại vật sát khít hai rìa trái/phải liên tục để chống đi thẳng
+                                posX = (i % 8 === 0) ? (-trackWidth / 2 + 1.4) : (trackWidth / 2 - 1.4);
+                            } else {
+                                posX = (Math.random() > 0.5) ? (trackWidth / 2 - 1.4) : (-trackWidth / 2 + 1.4);
+                            }
                             objectAttached.position.set(posX, 0.7, 0); segMesh.add(objectAttached); obstacles.push(objectAttached); objectType = "block";
                         }
                     }
@@ -384,7 +393,9 @@
             if (checkSeg && checkSeg.type === "ramp" && checkSeg.obj) {
                 let wPos = new THREE.Vector3(); checkSeg.obj.getWorldPosition(wPos);
                 if (Math.abs(playerBike.position.x - wPos.x) < 1.5 && Math.abs(playerBike.position.z - wPos.z) < 2.2) {
-                    extraRampHeight = 0.8; if (!isAirborne && speed > 0.35) { isAirborne = true; bikeVelocityY = speed * 0.72; }
+                    let lvlFactor = selectedLevel / 30;
+                    extraRampHeight = Math.max(0.3, 0.8 - (lvlFactor * 0.4)); 
+                    if (!isAirborne && speed > 0.35) { isAirborne = true; bikeVelocityY = speed * (0.72 - (lvlFactor * 0.2)); }
                 }
             }
             if (!isAirborne) {
@@ -398,7 +409,7 @@
             obstacles.forEach(obs => {
                 if(obs && obs.parent) {
                     let wPos = new THREE.Vector3(); obs.getWorldPosition(wPos);
-                    if (Math.abs(playerBike.position.x - wPos.x) < 1.2 && Math.abs(playerBike.position.z - wPos.z) < 1.2 && Math.abs(playerBike.position.y - wPos.y) < 1.2) { triggerCrash("ĐÂM SẦM VÀO KHỐI VẬT CẢN!"); }
+                    if (Math.abs(playerBike.position.x - wPos.x) < 1.3 && Math.abs(playerBike.position.z - wPos.z) < 1.2 && Math.abs(playerBike.position.y - wPos.y) < 1.2) { triggerCrash("ĐÂM SẦM VÀO KHỐI VẬT CẢN!"); }
                 }
             });
             checkpoints.forEach(cp => {
