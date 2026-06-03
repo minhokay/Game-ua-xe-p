@@ -3,33 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CyberBike 360° - Extreme Mobile Edition</title>
+    <title>CyberBike 360° - Extreme Bright Edition</title>
     <style>
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #020408; font-family: 'Segoe UI', Arial, sans-serif; user-select: none; color: #fff; touch-action: none; }
-        .screen-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #040610, #090d1a); display: flex; justify-content: center; align-items: center; z-index: 100; box-sizing: border-box; padding: 10px; }
-        .menu-box { background: rgba(6, 10, 24, 0.96); border: 2px solid #00ffcc; padding: 20px; border-radius: 20px; text-align: center; max-width: 450px; width: 100%; max-height: 95vh; overflow-y: auto; box-shadow: 0 0 35px rgba(0, 255, 204, 0.25); }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #0b1120; font-family: 'Segoe UI', Arial, sans-serif; user-select: none; color: #fff; touch-action: none; }
+        .screen-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0f172a, #1e1b4b); display: flex; justify-content: center; align-items: center; z-index: 100; box-sizing: border-box; padding: 10px; }
+        .menu-box { background: rgba(15, 23, 42, 0.95); border: 2px solid #00ffcc; padding: 20px; border-radius: 20px; text-align: center; max-width: 450px; width: 100%; max-height: 95vh; overflow-y: auto; box-shadow: 0 0 35px #00ffcc; }
         h1 { color: #00ffcc; font-size: 20px; margin: 0 0 5px 0; text-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
         .section-title { font-size: 11px; font-weight: bold; color: #facc15; margin: 12px 0 6px 0; text-align: left; text-transform: uppercase; }
         
         .level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 10px 0; }
-        .level-btn { padding: 8px 2px; text-align: center; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; border: 2px solid transparent; color: white; background: #1e293b; transition: 0.2s; }
-        .level-btn.locked { background: #0f172a !important; color: #475569 !important; cursor: not-allowed; border: 1px dashed #334155; }
-        .level-btn.active { border-color: #00ffcc; box-shadow: 0 0 12px #00ffcc; background: #0f766e; }
+        .level-btn { padding: 8px 2px; text-align: center; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; border: 2px solid transparent; color: white; background: #334155; transition: 0.2s; }
+        .level-btn.locked { background: #1e293b !important; color: #64748b !important; cursor: not-allowed; border: 1px dashed #475569; }
+        .level-btn.active { border-color: #00ffcc; box-shadow: 0 0 12px #00ffcc; background: #0d9488; }
 
         .play-panel { display: flex; justify-content: center; margin-top: 15px; width: 100%; }
-        .btn-play-active { background: linear-gradient(90deg, #00ffcc, #0284c7); color: #05070c; border: none; padding: 12px 35px; font-size: 15px; font-weight: bold; border-radius: 10px; cursor: pointer; display: none; box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4); }
+        .btn-play-active { background: linear-gradient(90deg, #00ffcc, #38bdf8); color: #0f172a; border: none; padding: 12px 35px; font-size: 15px; font-weight: bold; border-radius: 10px; cursor: pointer; display: none; box-shadow: 0 4px 15px #00ffcc; }
 
         #gameContainer { width: 100%; height: 100%; display: none; position: relative; }
-        #hud { position: absolute; top: 15px; left: 15px; background: rgba(4, 6, 12, 0.85); padding: 10px 15px; border-radius: 8px; border: 1.5px solid #00ffcc; pointer-events: none; z-index: 10; }
+        #hud { position: absolute; top: 15px; left: 15px; background: rgba(15, 23, 42, 0.9); padding: 10px 15px; border-radius: 8px; border: 1.5px solid #00ffcc; pointer-events: none; z-index: 10; }
         .hud-line { margin: 3px 0; font-weight: bold; font-size: 12px; }
         
-        #alert-text { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 18px; font-weight: bold; background: rgba(15, 5, 5, 0.95); border: 2px solid #ff3366; color: #ff6699; box-shadow: 0 0 25px #ff3366; padding: 20px; border-radius: 12px; display: none; pointer-events: none; z-index: 99; text-align: center; width: 80%; max-width: 360px; }
-        #win-screen { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 380px; background: rgba(4, 12, 8, 0.98); border: 3px solid #00ffcc; box-shadow: 0 0 40px #00ffcc; border-radius: 16px; padding: 25px; text-align: center; display: none; z-index: 100; }
+        #alert-text { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 18px; font-weight: bold; background: rgba(30, 41, 59, 0.95); border: 2px solid #ff3366; color: #ff6699; box-shadow: 0 0 25px #ff3366; padding: 20px; border-radius: 12px; display: none; pointer-events: none; z-index: 99; text-align: center; width: 80%; max-width: 360px; }
+        #win-screen { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 380px; background: rgba(15, 23, 42, 0.98); border: 3px solid #00ffcc; box-shadow: 0 0 40px #00ffcc; border-radius: 16px; padding: 25px; text-align: center; display: none; z-index: 100; }
         
         #mobileControls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; pointer-events: none; z-index: 10; }
         .ctrl-group { display: flex; gap: 15px; align-items: center; pointer-events: auto; }
-        .btn-ctrl { width: 68px; height: 68px; background: rgba(15, 23, 42, 0.75); border: 2px solid rgba(0, 255, 204, 0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; color: #00ffcc; }
-        .btn-ctrl:active { background: rgba(0, 255, 204, 0.3); border-color: #00ffcc; }
+        .btn-ctrl { width: 68px; height: 68px; background: rgba(30, 41, 59, 0.85); border: 2px solid #00ffcc; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; color: #00ffcc; }
+        .btn-ctrl:active { background: rgba(0, 255, 204, 0.4); }
         .btn-action { width: 78px; height: 78px; border-radius: 16px; font-size: 15px; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -37,10 +37,10 @@
 <body>
     <div id="menuOverlay" class="screen-overlay">
         <div class="menu-box">
-            <h1>🚲 CYBERBIKE 360°: REBORN V2 🚲</h1>
-            <p style="color: #94a3b8; font-size: 11px; margin: 0;">30 Màn - 3 Chặng Thử Thách Thời Tiết</p>
+            <h1>🚲 CYBERBIKE 360°: SIÊU SÁNG 🚲</h1>
+            <p style="color: #94a3b8; font-size: 11px; margin: 0;">Đã Fix Lỗi Tối Tăm & Giảm Độ Nhạy Cua</p>
 
-            <div class="section-title">🗺️ CHỌN MÀN CHƠI (3 CHẶNG):</div>
+            <div class="section-title">🗺️ CHỌN MÀN CHƠI THỬ THÁCH (1 - 30):</div>
             <div class="level-grid" id="levelGridContainer"></div>
             <div class="play-panel"><button id="mainPlayBtn" class="btn-play-active" onclick="initAndStartGame()">XUẤT PHÁT ĐUA 🏁</button></div>
         </div>
@@ -78,22 +78,19 @@
         let bikeVelocityY = 0; const gravity = 0.0065; let isAirborne = false; let isDead = false;
         let respawnX = 0, respawnY = 0, respawnZ = 0;
         let inputForward = false, inputReverse = false, inputLeft = false, inputRight = false;
-        let activeRoadSegments = {}; const segmentLength = 5; const renderDistanceChunks = 70;
-        
-        let skidMarksArray = []; // Mảng chứa các vết trượt lốp
+        let activeRoadSegments = {}; const segmentLength = 5; const renderDistanceChunks = 75;
+        let skidMarksArray = [];
 
         function loadProgress() {
             maxUnlockedLevel = parseInt(localStorage.getItem("cyber360_max_lvl") || "1");
             const container = document.getElementById("levelGridContainer"); container.innerHTML = "";
-            for (let i = 1; i <= 30; i++) { // Phục hồi 30 màn chơi
+            for (let i = 1; i <= 30; i++) {
                 const btn = document.createElement("button"); btn.innerText = i;
-                
-                // Đổi màu nút theo 3 chặng để dễ phân biệt
                 if (i > maxUnlockedLevel) { btn.className = "level-btn locked"; btn.disabled = true; } 
                 else {
                     btn.className = "level-btn" + (i === selectedLevel ? " active" : "");
-                    if(i >= 11 && i <= 20) btn.style.borderBottom = "3px solid #d97706"; // Chặng sương cam
-                    if(i >= 21) btn.style.borderBottom = "3px solid #9333ea"; // Chặng tối tăm
+                    if(i >= 11 && i <= 20) btn.style.borderBottom = "3px solid #facc15";
+                    if(i >= 21) btn.style.borderBottom = "3px solid #a855f7";
                     btn.onclick = () => { selectedLevel = i; loadProgress(); document.getElementById("mainPlayBtn").style.display = "block"; };
                 }
                 container.appendChild(btn);
@@ -102,26 +99,24 @@
 
         function getTrackInfo(zPos) {
             if (zPos > 5) return { centerX: 0, centerY: 0, isGap: false, isRamp: false, obstacleType: 0 };
-            
-            let curveFreq = 0.0025 + (selectedLevel * 0.0005);
-            let curveAmp = 16 + (selectedLevel * 2.0);
-            let centerX = Math.sin(zPos * curveFreq) * curveAmp + Math.cos(zPos * 0.01) * (curveAmp * 0.3);
-            let centerY = (zPos * 0.035) + Math.sin(zPos * 0.005) * 10;
+            let curveFreq = 0.002 + (selectedLevel * 0.0004);
+            let curveAmp = 14 + (selectedLevel * 1.5);
+            let centerX = Math.sin(zPos * curveFreq) * curveAmp + Math.cos(zPos * 0.01) * (curveAmp * 0.25);
+            let centerY = (zPos * 0.03) + Math.sin(zPos * 0.004) * 8;
 
             let blockIndex = Math.floor(Math.abs(zPos) / 50);
             let isGap = false; let isRamp = false; let obstacleType = 0;
 
             if (blockIndex > 0) {
                 let subPos = Math.abs(zPos) % 50;
-                let gapWidth = Math.min(24, 12 + selectedLevel * 0.8);
-                if (subPos > 25 && subPos < 25 + gapWidth) isGap = true; 
-                // Tần suất dốc bay giảm dần ở level cao
-                let hasRampChance = Math.max(0.2, 1.0 - (selectedLevel * 0.03));
-                if (subPos >= 19 && subPos <= 25 && Math.random() < hasRampChance) isRamp = true;
+                let gapWidth = Math.min(22, 11 + selectedLevel * 0.7);
+                if (subPos > 26 && subPos < 26 + gapWidth) isGap = true; 
+                let hasRampChance = Math.max(0.15, 0.9 - (selectedLevel * 0.03));
+                if (subPos >= 20 && subPos <= 26 && Math.random() < hasRampChance) isRamp = true;
 
-                if (!isGap && !isRamp && subPos > 5 && subPos < 12) {
-                    let obsSeed = Math.abs(Math.sin(blockIndex * 99));
-                    let obstacleChanceThreshold = 0.3 + (selectedLevel * 0.04);
+                if (!isGap && !isRamp && subPos > 6 && subPos < 13) {
+                    let obsSeed = Math.abs(Math.sin(blockIndex * 88));
+                    let obstacleChanceThreshold = 0.25 + (selectedLevel * 0.04);
                     if (obsSeed < obstacleChanceThreshold) obstacleType = obsSeed < (obstacleChanceThreshold * 0.5) ? 1 : 2;
                 }
             }
@@ -130,12 +125,16 @@
 
         function buildBikeMesh() {
             const bikeGroup = new THREE.Group();
-            const mat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.9, roughness: 0.1 });
-            const rubber = new THREE.MeshStandardMaterial({ color: 0x111827 });
-            const wheelGeo = new THREE.TorusGeometry(0.45, 0.05, 8, 24);
+            // Đổi màu xe sang màu vàng chanh phản quang siêu sáng
+            const mat = new THREE.MeshStandardMaterial({ color: 0xccff00, metalness: 0.9, roughness: 0.1, emissive: 0x66ff00, emissiveIntensity: 0.3 });
+            const rubber = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+            
+            const wheelGeo = new THREE.TorusGeometry(0.48, 0.06, 8, 24);
             const w1 = new THREE.Mesh(wheelGeo, rubber); w1.position.set(0, 0.5, -0.65); bikeGroup.add(w1);
             const w2 = new THREE.Mesh(wheelGeo, rubber); w2.position.set(0, 0.5, 0.65); bikeGroup.add(w2);
-            const b1 = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.9).rotateX(Math.PI/4), mat); b1.position.set(0,0.65,-0.1); bikeGroup.add(b1);
+            
+            const b1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.0).rotateX(Math.PI/4), mat); 
+            b1.position.set(0, 0.65, -0.1); bikeGroup.add(b1);
             return bikeGroup;
         }
 
@@ -154,20 +153,28 @@
 
             scene = new THREE.Scene(); 
             
-            // XỬ LÝ KHÍ HẬU SƯƠNG MÙ THEO 3 CHẶNG
+            // FIX LỖI TỐI: Đổi màu nền sáng sủa hơn, giảm mật độ sương mù xuống
             if (selectedLevel <= 10) {
-                scene.background = new THREE.Color(0x02040a); scene.fog = new THREE.FogExp2(0x060914, 0.015); // Chặng 1: Thoáng
+                scene.background = new THREE.Color(0x0a192f); scene.fog = new THREE.FogExp2(0x0a192f, 0.008); 
             } else if (selectedLevel <= 20) {
-                scene.background = new THREE.Color(0x2a1408); scene.fog = new THREE.FogExp2(0x78350f, 0.035); // Chặng 2: Sương cam đặc
+                scene.background = new THREE.Color(0x3c1e08); scene.fog = new THREE.FogExp2(0x3c1e08, 0.012); 
             } else {
-                scene.background = new THREE.Color(0x000000); scene.fog = new THREE.FogExp2(0x050505, 0.055); // Chặng 3: Tối đen kịt
+                scene.background = new THREE.Color(0x1e1b4b); scene.fog = new THREE.FogExp2(0x1e1b4b, 0.015); 
             }
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById("gameContainer").appendChild(renderer.domElement);
 
-            scene.add(new THREE.DirectionalLight(0xffffff, 1.2).position.set(10, 30, 15)); scene.add(new THREE.AmbientLight(0x1e1b4b, 0.8));
+            // Tăng cường độ sáng đèn để nhìn rõ mọi vật thể
+            let sun = new THREE.DirectionalLight(0xffffff, 2.0); sun.position.set(20, 40, 20); scene.add(sun);
+            scene.add(new THREE.AmbientLight(0xffffff, 1.2)); 
+
+            // Thêm ngàn sao sáng lấp lánh trên trời làm phong cảnh
+            const starGeo = new THREE.BufferGeometry(); const starPos = new Float32Array(800 * 3);
+            for(let i=0; i<800*3; i+=3){ starPos[i]=(Math.random()-0.5)*500; starPos[i+1]=(Math.random()*150)+20; starPos[i+2]=(Math.random()-0.5)*500; }
+            starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+            scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x00ffff, size: 0.8 })));
 
             let initTrack = getTrackInfo(0); respawnX = initTrack.centerX; respawnY = initTrack.centerY; respawnZ = 0;
             playerBike = buildBikeMesh(); playerBike.position.set(respawnX, respawnY, respawnZ); scene.add(playerBike);
@@ -182,17 +189,20 @@
                         let nextTrackData = getTrackInfo(zPos - segmentLength);
                         const roadGroup = new THREE.Group();
                         let roadThickness = trackData.isRamp ? 0.4 : 0.15;
-                        const roadMat = new THREE.MeshStandardMaterial({ color: trackData.isRamp ? 0xea580c : 0x1e293b, roughness: 0.4, metalness: 0.1 });
+                        
+                        // Làm đường đua sáng rõ với sắc xanh dạ quang (Cyan)
+                        const roadMat = new THREE.MeshStandardMaterial({ color: trackData.isRamp ? 0xf97316 : 0x0f172a, roughness: 0.3, metalness: 0.2 });
                         const mainRoadMesh = new THREE.Mesh(new THREE.BoxGeometry(trackWidth, roadThickness, segmentLength + 0.05), roadMat); mainRoadMesh.position.y = roadThickness/2; roadGroup.add(mainRoadMesh);
 
-                        const guardRailMat = new THREE.MeshBasicMaterial({ color: 0xff2e93 }); 
-                        const leftRail = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, segmentLength + 0.05), guardRailMat); leftRail.position.set(-trackWidth/2, 0.4, 0); roadGroup.add(leftRail);
+                        // Tường biên phát sáng rực rỡ cực kỳ dễ nhìn
+                        const guardRailMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc }); 
+                        const leftRail = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.9, segmentLength + 0.05), guardRailMat); leftRail.position.set(-trackWidth/2, 0.45, 0); roadGroup.add(leftRail);
                         const rightRail = leftRail.clone(); rightRail.position.x = trackWidth/2; roadGroup.add(rightRail);
 
                         if (trackData.obstacleType > 0) { 
-                            const obsGeo = new THREE.BoxGeometry(trackData.obstacleType === 1 ? 3.5 : 2.0, 0.8, 1.0);
-                            const obs = new THREE.Mesh(obsGeo, new THREE.MeshStandardMaterial({ color: trackData.obstacleType === 1 ? 0xd97706 : 0x0284c7 }));
-                            obs.position.set((Math.sin(i) * (trackWidth - 5.0))/2, 0.5, 0); roadGroup.add(obs);
+                            const obsGeo = new THREE.BoxGeometry(trackData.obstacleType === 1 ? 3.5 : 2.0, 0.9, 1.2);
+                            const obs = new THREE.Mesh(obsGeo, new THREE.MeshStandardMaterial({ color: trackData.obstacleType === 1 ? 0xef4444 : 0x3b82f6, emissive: 0xff0000, emissiveIntensity: 0.2 }));
+                            obs.position.set((Math.sin(i) * (trackWidth - 5.0))/2, 0.55, 0); roadGroup.add(obs);
                         }
                         roadGroup.position.set(trackData.centerX, (trackData.centerY + nextTrackData.centerY)/2, (zPos + (zPos - segmentLength))/2);
                         roadGroup.lookAt(new THREE.Vector3(nextTrackData.centerX, nextTrackData.centerY, zPos - segmentLength));
@@ -203,17 +213,11 @@
             for (let key in activeRoadSegments) { if (parseInt(key) > currentSegmentIdx + 12 || parseInt(key) < currentSegmentIdx - renderDistanceChunks - 15) { scene.remove(activeRoadSegments[key]); delete activeRoadSegments[key]; } }
         }
 
-        // TẠO VẾT TRƯỢT LỐP ĐEN (SKID MARKS) TRÊN MẶT ĐƯỜNG
         function createSkidMark(x, y, z) {
-            const skidGeo = new THREE.PlaneGeometry(0.3, 0.8);
-            const skidMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.7 });
-            const mark = new THREE.Mesh(skidGeo, skidMat);
-            mark.position.set(x, y + 0.2, z);
-            mark.rotation.x = -Math.PI / 2;
-            mark.rotation.z = playerBike.rotation.y; // Vết xoay theo hướng bánh xe
-            scene.add(mark);
-            skidMarksArray.push(mark);
-            if(skidMarksArray.length > 50) { scene.remove(skidMarksArray[0]); skidMarksArray.shift(); } // Giới hạn số lượng để mượt máy
+            const mark = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.8), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.8 }));
+            mark.position.set(x, y + 0.22, z); mark.rotation.x = -Math.PI / 2; mark.rotation.z = playerBike.rotation.y;
+            scene.add(mark); skidMarksArray.push(mark);
+            if(skidMarksArray.length > 50) { scene.remove(skidMarksArray[0]); skidMarksArray.shift(); }
         }
 
         function triggerCrash(message) {
@@ -234,16 +238,14 @@
             if (inputForward) { speed = Math.min(speed + acceleration, maxSpeed); }
             else if (inputReverse) { 
                 speed = speed > 0 ? Math.max(speed - brakeForce, 0) : Math.max(speed - acceleration, -maxSpeed * 0.3); 
-                if(speed > 0.2) isDrifting = true; // Phanh gấp ở tốc độ cao
+                if(speed > 0.15) isDrifting = true;
             } else { speed *= friction; if (Math.abs(speed) < 0.002) speed = 0; }
 
-            if (inputLeft) { playerBike.rotation.y += 0.045; if(speed > 0.4) isDrifting = true; } // Bẻ lái gấp
-            if (inputRight) { playerBike.rotation.y -= 0.045; if(speed > 0.4) isDrifting = true; }
+            // ĐÃ FIX: Giảm tốc độ bẻ lái từ 0.045 xuống 0.022 giúp điều khiển đầm và mượt, không sợ văng đường
+            if (inputLeft) { playerBike.rotation.y += 0.022; if(speed > 0.35) isDrifting = true; }
+            if (inputRight) { playerBike.rotation.y -= 0.022; if(speed > 0.35) isDrifting = true; }
 
-            // Nếu đang drift hoặc phanh gấp thì sinh ra vết trượt lốp
-            if(isDrifting && !isAirborne && Math.random() > 0.3) {
-                createSkidMark(playerBike.position.x, playerBike.position.y, playerBike.position.z);
-            }
+            if(isDrifting && !isAirborne && Math.random() > 0.2) { createSkidMark(playerBike.position.x, playerBike.position.y, playerBike.position.z); }
 
             playerBike.position.x -= Math.sin(playerBike.rotation.y) * speed; playerBike.position.z -= Math.cos(playerBike.rotation.y) * speed;
             updateDynamicTrackMesh(playerBike.position.z);
@@ -252,22 +254,22 @@
             let distanceFromPathCenter = Math.abs(playerBike.position.x - currentLocInfo.centerX);
 
             if (!currentLocInfo.isGap && !isAirborne && distanceFromPathCenter >= (trackWidth / 2 - 0.4)) { triggerCrash("ĐÂM VÀO RÀO CHẮN MÉP ĐƯỜNG!"); return; }
-            if (currentLocInfo.isGap && !isAirborne) { isAirborne = true; bikeVelocityY = speed * 0.08; }
+            if (currentLocInfo.isGap && !isAirborne) { isAirborne = true; bikeVelocityY = speed * 0.07; }
             if (!currentLocInfo.isGap && distanceFromPathCenter > trackWidth / 2) { isAirborne = true; }
-            if (currentLocInfo.isRamp && !isAirborne && speed > 0.12) { isAirborne = true; bikeVelocityY = 0.12 + (speed * 0.1); } // Độ cao nảy thu thấp lại
+            if (currentLocInfo.isRamp && !isAirborne && speed > 0.12) { isAirborne = true; bikeVelocityY = 0.09 + (speed * 0.08); }
 
             if (!isAirborne) {
                 playerBike.position.y = currentLocInfo.centerY;
                 let lookupAhead = getTrackInfo(playerBike.position.z - 0.4); playerBike.rotation.x = Math.atan2(lookupAhead.centerY - currentLocInfo.centerY, 0.4);
             } else {
-                bikeVelocityY -= gravity; playerBike.position.y += bikeVelocityY; playerBike.rotation.x += 0.015;
+                bikeVelocityY -= gravity; playerBike.position.y += bikeVelocityY; playerBike.rotation.x += 0.01;
                 let groundState = getTrackInfo(playerBike.position.z);
                 if (playerBike.position.y <= groundState.centerY) {
                     let distCheck = Math.abs(playerBike.position.x - groundState.centerX);
                     if (!groundState.isGap && distCheck <= trackWidth / 2) {
                         playerBike.position.y = groundState.centerY; isAirborne = false; bikeVelocityY = 0;
                         respawnX = groundState.centerX; respawnY = groundState.centerY; respawnZ = playerBike.position.z;
-                    } else if (playerBike.position.y < groundState.centerY - 22) { triggerCrash("RƠI XUỐNG VỰC SÂU!"); return; }
+                    } else if (playerBike.position.y < groundState.centerY - 18) { triggerCrash("RƠI XUỐNG VỰC SÂU THĂM THẲM!"); return; }
                 }
             }
 
