@@ -4,7 +4,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Đua Xe Đạp Địa Hình 3D Nâng Cấp</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #050510;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+        #gameCanvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        /* Giao diện HUD hiển thị thông số góc phải */
+        #hud {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid #3a3a5a;
+            font-size: 16px;
+            pointer-events: none;
+        }
+        .hud-line {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            width: 200px;
+        }
+        .highlight {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+        /* Thanh năng lượng Boost Nitro */
+        .bar-container {
+            width: 100%;
+            background: #222;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 5px;
+            border: 1px solid #444;
+        }
+        #boostBar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #ff3300, #ffcc00);
+            transition: width 0.1s ease;
+        }
+        /* Màn hình thông báo Overlays khi Thua hoặc Thắng */
+        #screenOverlay {
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+        #screenOverlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #screenTitle {
+            font-size: 48px;
+            color: #ff3333;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+        }
+        #screenDesc {
+            font-size: 20px;
+            color: #ccc;
+            margin-bottom: 25px;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .btn {
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #00ffcc;
+            color: #050510;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            background: #00cca3;
+        }
+        #controlsHelp {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            pointer-events: none;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 <body>
 
@@ -32,661 +144,491 @@
         <button id="screenBtn" class="btn" onclick="handleScreenButtonClick()">Thử lại</button>
     </div>
 
-    <script src="game.js"></script>
-</body>
-</html>
-body {
-    margin: 0;
-    padding: 0;
-    background: #050510;
-    overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    user-select: none;
-}
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-#gameCanvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-}
-
-/* Giao diện HUD hiển thị thông số góc phải */
-#hud {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    color: white;
-    background: rgba(0, 0, 0, 0.75);
-    padding: 15px 25px;
-    border-radius: 10px;
-    border: 2px solid #3a3a5a;
-    font-size: 16px;
-    pointer-events: none;
-}
-
-.hud-line {
-    margin: 5px 0;
-    display: flex;
-    justify-content: space-between;
-    width: 200px;
-}
-
-.highlight {
-    color: #00ffcc;
-    font-weight: bold;
-}
-
-/* Thanh năng lượng Boost Nitro */
-.bar-container {
-    width: 100%;
-    background: #222;
-    height: 12px;
-    border-radius: 6px;
-    overflow: hidden;
-    margin-top: 5px;
-    border: 1px solid #444;
-}
-
-#boostBar {
-    height: 100%;
-    width: 100%;
-    background: linear-gradient(90deg, #ff3300, #ffcc00);
-    transition: width 0.1s ease;
-}
-
-/* Màn hình thông báo Overlays khi Thua hoặc Thắng */
-#screenOverlay {
-    position: absolute;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.85);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease;
-    z-index: 10;
-}
-
-#screenOverlay.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-#screenTitle {
-    font-size: 48px;
-    color: #ff3333;
-    margin-bottom: 10px;
-    text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
-}
-
-#screenDesc {
-    font-size: 20px;
-    color: #ccc;
-    margin-bottom: 25px;
-    text-align: center;
-    padding: 0 20px;
-}
-
-.btn {
-    padding: 12px 30px;
-    font-size: 18px;
-    font-weight: bold;
-    background: #00ffcc;
-    color: #050510;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
-}
-
-.btn:hover {
-    transform: scale(1.05);
-    background: #00cca3;
-}
-
-#controlsHelp {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 13px;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 10px;
-    border-radius: 5px;
-    pointer-events: none;
-    line-height: 1.5;
-}
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-
-// Thiết lập kích thước Canvas toàn màn hình
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-// ==========================================
-// KHỞI TẠO BIẾN CẤU HÌNH HỆ THỐNG GAME
-// ==========================================
-let gameState = "PLAYING"; 
-let currentLevel = 1;
-let maxSpeed = 65;
-let trackLength = 10; // Đơn vị: km
-let obstacleFrequency = 0.15;
-let rampFrequency = 0.4;
-
-// Trạng thái vật lý của chiếc xe đạp
-let bike = {
-    x: 0,                  // Trục ngang (Trái / Phải)
-    y: 0,                  // Trục đứng (Độ cao khi bay)
-    z: 0,                  // Trục dọc (Chiều sâu tịnh tiến)
-    speed: 0,              // Vận tốc hiện tại
-    rotation: 0,           // Góc xoay xe tự do 360 độ (Radian)
-    stamina: 100,          // Năng lượng Boost hiện tại
-    maxStamina: 100,
-    isFirstPerson: false,  // Đổi góc nhìn chủ động
-    airBorne: false,       // Trạng thái đang bay trên không
-    verticalVelocity: 0,   // Vận tốc nhảy cao theo trục Y
-    currentSegmentIndex: 0
-};
-
-// Quản lý trạng thái tương tác bàn phím
-const keys = { KeyW: false, KeyS: false, KeyA: false, KeyD: false, Space: false };
-
-window.addEventListener('keydown', (e) => {
-    if (e.code === 'KeyW') keys.KeyW = true;
-    if (e.code === 'KeyS') keys.KeyS = true;
-    if (e.code === 'KeyA') keys.KeyA = true;
-    if (e.code === 'KeyD') keys.KeyD = true;
-    if (e.code === 'Space') keys.Space = true;
-    
-    // Nhấn phím V để đảo góc nhìn chủ động (1st Person <=> 3rd Person)
-    if (e.code === 'KeyV' && gameState === "PLAYING") {
-        bike.isFirstPerson = !bike.isFirstPerson;
-    }
-});
-
-window.addEventListener('keyup', (e) => {
-    if (e.code === 'KeyW') keys.KeyW = false;
-    if (e.code === 'KeyS') keys.KeyS = false;
-    if (e.code === 'KeyA') keys.KeyA = false;
-    if (e.code === 'KeyD') keys.KeyD = false;
-    if (e.code === 'Space') keys.Space = false;
-});
-
-// Bộ đếm nhận diện kỹ năng (Cua gắt / Tiếp đất hoàn hảo)
-let lastAirBorneState = false;
-let perfectTurnCounter = 0;
-let trackSegments = [];
-
-// ==========================================
-// LOGIC TIẾN TRÌNH VÀ ĐỘ KHÓ (LEVEL SCALING)
-// ==========================================
-function initLevel(level) {
-    currentLevel = level;
-    gameState = "PLAYING";
-    document.getElementById('screenOverlay').classList.remove('active');
-    
-    // Thuật toán tự động tính toán thông số theo level của cậu
-    if (level <= 3) {
-        maxSpeed = 65;
-        trackLength = 10;
-        obstacleFrequency = 0.1 + (level * 0.04);
-        rampFrequency = 0.45 - (level * 0.05); // Giảm tần suất dốc đại trà
-    } else {
-        maxSpeed = 65 + (level - 3) * 5;
-        trackLength = 10 + (level - 3) * 10;
-        obstacleFrequency = 0.22 + (level - 3) * 0.06;
-        rampFrequency = Math.max(0.12, 0.3 - (level - 3) * 0.02);
-    }
-
-    // Reset xe về vạch xuất phát
-    bike.x = 0; bike.y = 0; bike.z = 0;
-    bike.speed = 0; bike.rotation = 0;
-    bike.stamina = 100;
-    bike.airBorne = false;
-    bike.verticalVelocity = 0;
-
-    generateTrack();
-    updateHUD();
-}
-
-// Thiết kế đường đua uốn lượn, cua chữ S và rải đảo nổi lơ lửng
-function generateTrack() {
-    trackSegments = [];
-    let totalSegments = Math.floor(trackLength * 120); 
-    let currentXPattern = 0;
-
-    for (let i = 0; i < totalSegments; i++) {
-        // Tạo cua chữ S uốn lượn bằng hàm Sin toán học
-        if (i > 30 && i < totalSegments - 50) {
-            currentXPattern += Math.sin(i * 0.04) * 2.2;
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-        let seg = {
-            index: i,
-            centerZ: i * 12,
-            centerX: currentXPattern,
-            width: 35,
-            isFloating: false,
-            hasRamp: false,
-            rampHeight: 0,
-            hasObstacle: false,
-            obstacleX: 0
+        // ==========================================
+        // CẤU HÌNH HỆ THỐNG & BIẾN TRẠNG THÁI
+        // ==========================================
+        let gameState = "PLAYING"; 
+        let currentLevel = 1;
+        let maxSpeed = 65;
+        let trackLength = 10; 
+        let obstacleFrequency = 0.15;
+        let rampFrequency = 0.4;
+
+        let bike = {
+            x: 0, y: 0, z: 0,
+            speed: 0,
+            rotation: 0,
+            stamina: 100,
+            maxStamina: 100,
+            isFirstPerson: false,
+            airBorne: false,
+            verticalVelocity: 0,
+            currentSegmentIndex: 0
         };
 
-        // Tạo chu kỳ đường lơ lửng bị tách rời ngẫu nhiên rải rác
-        if (i > 40 && i % 45 >= 38 && i < totalSegments - 40) {
-            seg.isFloating = true; 
+        const keys = { KeyW: false, KeyS: false, KeyA: false, KeyD: false, Space: false };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyW') keys.KeyW = true;
+            if (e.code === 'KeyS') keys.KeyS = true;
+            if (e.code === 'KeyA') keys.KeyA = true;
+            if (e.code === 'KeyD') keys.KeyD = true;
+            if (e.code === 'Space') keys.Space = true;
             
-            // Đặt dốc bay ở mép block trước hố sâu (Hạ độ cao xuống để tránh bay quá xa gây chán)
-            if (i % 45 === 38 && Math.random() < rampFrequency) {
-                seg.hasRamp = true;
-                seg.rampHeight = 4.5; 
+            if (e.code === 'KeyV' && gameState === "PLAYING") {
+                bike.isFirstPerson = !bike.isFirstPerson;
             }
-        } else {
-            // Đặt chướng ngại vật ngẫu nhiên trên phần đường liền
-            if (i > 30 && Math.random() < obstacleFrequency && i % 15 === 0) {
-                seg.hasObstacle = true;
-                seg.obstacleX = (Math.random() - 0.5) * 20; 
-            }
-        }
-        trackSegments.push(seg);
-    }
-}
+        });
 
-// ==========================================
-// VẬT LÝ DI CHUYỂN 360 ĐỘ TỰ DO VÀ VA CHẠM
-// ==========================================
-function updatePhysics() {
-    if (gameState !== "PLAYING") return;
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'KeyW') keys.KeyW = false;
+            if (e.code === 'KeyS') keys.KeyS = false;
+            if (e.code === 'KeyA') keys.KeyA = false;
+            if (e.code === 'KeyD') keys.KeyD = false;
+            if (e.code === 'Space') keys.Space = false;
+        });
 
-    // Cơ chế nút Tiến (W) và Phanh/Lùi chuyển số (S)
-    if (keys.KeyW) {
-        if (bike.speed < maxSpeed) bike.speed += 0.6;
-    } else if (keys.KeyS) {
-        if (bike.speed > 0) {
-            bike.speed -= 1.4; // Lực phanh hãm bánh gắt
-        } else {
-            bike.speed -= 0.25; // Tự động lùi khi xe đã dừng hẳn
-            if (bike.speed < -18) bike.speed = -18;
-        }
-    } else {
-        bike.speed *= 0.975; // Ma sát tự nhiên chậm dần
-        if (Math.abs(bike.speed) < 0.05) bike.speed = 0;
-    }
-
-    // Bẻ lái cua xe xoay tròn 360 độ hoàn toàn không giới hạn góc rẽ
-    if (keys.KeyA) {
-        bike.rotation -= 0.045;
-        if (bike.speed > 30) perfectTurnCounter++; // Tích điểm cua mượt tốc độ cao
-    }
-    if (keys.KeyD) {
-        bike.rotation += 0.045;
-        if (bike.speed > 30) perfectTurnCounter++;
-    }
-
-    // Quản lý và tiêu hao năng lượng Boost Nitro (Space)
-    if (keys.Space && bike.stamina > 8 && bike.speed > 5) {
-        bike.speed = Math.min(bike.speed + 1.2, maxSpeed * 1.35); // Bứt phá giới hạn maxSpeed
-        bike.stamina -= 0.65;
-    } else {
-        // Hồi phục mặc định theo thời gian SIÊU CHẬM
-        bike.stamina = Math.min(bike.maxStamina, bike.stamina + 0.04);
-    }
-
-    // Cộng thưởng năng lượng lớn khi thực hiện chuỗi Cua rẽ Hoàn hảo (Perfect Drift)
-    if (perfectTurnCounter > 45) {
-        bike.stamina = Math.min(bike.maxStamina, bike.stamina + 12);
-        perfectTurnCounter = 0;
-    }
-
-    // Cập nhật tọa độ thực trong không gian dựa trên góc quay hiện tại của xe
-    let speedFactor = bike.speed * 0.08;
-    bike.x += Math.sin(bike.rotation) * speedFactor;
-    bike.z += Math.cos(bike.rotation) * speedFactor;
-
-    let currentSegIdx = Math.floor(bike.z / 12);
-    bike.currentSegmentIndex = currentSegIdx;
-
-    // Cán mốc đích đường đua để giành chiến thắng
-    if (currentSegIdx >= trackSegments.length - 1) {
-        triggerWin();
-        return;
-    }
-
-    // Xử lý hệ thống Trọng lực rơi tự do vật lý (Vực lơ lửng hoặc lao dốc)
-    let activeSegment = trackSegments[Math.max(0, currentSegIdx)];
-    let targetFloorY = 0;
-
-    if (activeSegment) {
-        let distanceFromCenter = Math.abs(bike.x - activeSegment.centerX);
-        
-        if (activeSegment.isFloating && distanceFromCenter < activeSegment.width / 2) {
-            targetFloorY = -999; // Lọt hố giữa các đoạn tách rời lơ lửng
-        } else if (distanceFromCenter > activeSegment.width / 2) {
-            targetFloorY = -999; // Chạy lọt ra rìa mép vực thẳm bầu trời
-        } else {
-            targetFloorY = 0;
-            if (activeSegment.hasRamp) targetFloorY = activeSegment.rampHeight; // Leo dốc phóng
-        }
-    }
-
-    if (bike.y > targetFloorY || targetFloorY === -999) {
-        bike.airBorne = true;
-        bike.verticalVelocity -= 0.28; // Gia tốc trọng lực kéo xuống
-        bike.y += bike.verticalVelocity;
-        
-        if (bike.y < -150) {
-            triggerGameOver("Bạn đã hụt chân rơi tự do xuống vực sâu lơ lửng!");
-        }
-    } else {
-        bike.y = targetFloorY;
-        bike.verticalVelocity = 0;
-        bike.airBorne = false;
-
-        // Cộng thưởng năng lượng siêu nhiều khi Tiếp đất Hoàn hảo (Perfect Landing) từ không trung
-        if (lastAirBorneState === true && targetFloorY !== -999) {
-            bike.stamina = Math.min(bike.maxStamina, bike.stamina + 35);
-        }
-
-        // Kích hoạt lực phóng xe bay lên trời khi chạy qua bệ dốc với tốc độ cao
-        if (activeSegment && activeSegment.hasRamp && bike.speed > 25) {
-            bike.verticalVelocity = bike.speed * 0.12; 
-            bike.airBorne = true;
-        }
-    }
-    lastAirBorneState = bike.airBorne;
-
-    // HỆ THỐNG KIỂM TRA ĐÂM SẦM VÀO TƯỜNG CHẮN BẢO VỆ 2 BÊN MÉP
-    if (activeSegment && targetFloorY !== -999) {
-        let distanceFromCenter = Math.abs(bike.x - activeSegment.centerX);
-        let wallThreshold = (activeSegment.width / 2) - 1.5;
-
-        if (distanceFromCenter >= wallThreshold) {
-            if (Math.abs(bike.speed) > 18) { // Chạy tốc độ cao đâm sầm mép tường chắn bảo vệ = Chết
-                triggerGameOver("Bạn chạy tốc độ cao đâm sầm vào tường chắn hai bên!");
-                return;
+        let lastAirBorneState = false;
+        let perfectTurnCounter = 0;
+        let trackSegments = [];
+                // ==========================================
+        // LOGIC TIẾN TRÌNH (LEVEL SCALING)
+        // ==========================================
+        function initLevel(level) {
+            currentLevel = level;
+            gameState = "PLAYING";
+            document.getElementById('screenOverlay').classList.remove('active');
+            
+            if (level <= 3) {
+                maxSpeed = 65;
+                trackLength = 10;
+                obstacleFrequency = 0.1 + (level * 0.04);
+                rampFrequency = 0.45 - (level * 0.05);
             } else {
-                // Tốc độ thấp chỉ chặn xe lại không cho lọt ra ngoài đường đua
-                bike.x = activeSegment.centerX + Math.sign(bike.x - activeSegment.centerX) * wallThreshold;
-                bike.speed = 0; 
+                maxSpeed = 65 + (level - 3) * 5;
+                trackLength = 10 + (level - 3) * 10;
+                obstacleFrequency = 0.22 + (level - 3) * 0.06;
+                rampFrequency = Math.max(0.12, 0.3 - (level - 3) * 0.02);
+            }
+
+            bike.x = 0; bike.y = 0; bike.z = 0;
+            bike.speed = 0; bike.rotation = 0;
+            bike.stamina = 100;
+            bike.airBorne = false;
+            bike.verticalVelocity = 0;
+
+            generateTrack();
+            updateHUD();
+        }
+
+        function generateTrack() {
+            trackSegments = [];
+            let totalSegments = Math.floor(trackLength * 120); 
+            let currentXPattern = 0;
+
+            for (let i = 0; i < totalSegments; i++) {
+                if (i > 30 && i < totalSegments - 50) {
+                    currentXPattern += Math.sin(i * 0.04) * 2.2;
+                }
+
+                let seg = {
+                    index: i,
+                    centerZ: i * 12,
+                    centerX: currentXPattern,
+                    width: 35,
+                    isFloating: false,
+                    hasRamp: false,
+                    rampHeight: 0,
+                    hasObstacle: false,
+                    obstacleX: 0
+                };
+
+                if (i > 40 && i % 45 >= 38 && i < totalSegments - 40) {
+                    seg.isFloating = true; 
+                    if (i % 45 === 38 && Math.random() < rampFrequency) {
+                        seg.hasRamp = true;
+                        seg.rampHeight = 4.5; 
+                    }
+                } else {
+                    if (i > 30 && Math.random() < obstacleFrequency && i % 15 === 0) {
+                        seg.hasObstacle = true;
+                        seg.obstacleX = (Math.random() - 0.5) * 20; 
+                    }
+                }
+                trackSegments.push(seg);
             }
         }
-    }
 
-    // Kiểm tra va chạm trực diện với Chướng ngại vật (Hộp đỏ) trên đường
-    if (activeSegment && activeSegment.hasObstacle) {
-        let distToObstacleX = Math.abs(bike.x - activeSegment.obstacleX);
-        if (distToObstacleX < 2.5 && !bike.airBorne) {
-            triggerGameOver("Bạn đã va chạm trực diện vào khối chướng ngại vật!");
-            return;
-        }
-    }
-}
+        // ==========================================
+        // VẬT LÝ DI CHUYỂN 360° & VA CHẠM
+        // ==========================================
+        function updatePhysics() {
+            if (gameState !== "PLAYING") return;
 
-// ==========================================
-// RENDER HÌNH ẢNH GIẢ LẬP ĐỒ HỌA PHỐI CẢNH 3D
-// ==========================================
-function drawFrame() {
-    // Thiết lập màu sắc bầu trời động tùy chỉnh theo level
-    ctx.fillStyle = getSkyColor();
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if (keys.KeyW) {
+                if (bike.speed < maxSpeed) bike.speed += 0.6;
+            } else if (keys.KeyS) {
+                if (bike.speed > 0) {
+                    bike.speed -= 1.4; 
+                } else {
+                    bike.speed -= 0.25; 
+                    if (bike.speed < -18) bike.speed = -18;
+                }
+            } else {
+                bike.speed *= 0.975; 
+                if (Math.abs(bike.speed) < 0.05) bike.speed = 0;
+            }
 
-    drawSkyClouds(); // Vẽ mây trôi trang trí
+            if (keys.KeyA) {
+                bike.rotation -= 0.045;
+                if (bike.speed > 30) perfectTurnCounter++; 
+            }
+            if (keys.KeyD) {
+                bike.rotation += 0.045;
+                if (bike.speed > 30) perfectTurnCounter++;
+            }
 
-    let currentSegIdx = Math.floor(bike.z / 12);
-    let viewRange = 65; // Tầm nhìn vẽ xa về phía trước
+            if (keys.Space && bike.stamina > 8 && bike.speed > 5) {
+                bike.speed = Math.min(bike.speed + 1.2, maxSpeed * 1.35); 
+                bike.stamina -= 0.65;
+            } else {
+                bike.stamina = Math.min(bike.maxStamina, bike.stamina + 0.04);
+            }
 
-    // Quét vẽ địa hình từ xa về gần để xử lý phân tầng chiều sâu chính xác
-    for (let i = viewRange; i >= -5; i--) {
-        let index = currentSegIdx + i;
-        if (index < 0 || index >= trackSegments.length) continue;
+            if (perfectTurnCounter > 45) {
+                bike.stamina = Math.min(bike.maxStamina, bike.stamina + 12);
+                perfectTurnCounter = 0;
+            }
 
-        let segment = trackSegments[index];
-        
-        let p1 = project3DTo2D(segment.centerX - segment.width/2, (segment.hasRamp ? segment.rampHeight : 0), segment.centerZ);
-        let p2 = project3DTo2D(segment.centerX + segment.width/2, (segment.hasRamp ? segment.rampHeight : 0), segment.centerZ);
-        
-        let nextSegment = trackSegments[index + 1];
-        let p3, p4;
-        if (nextSegment) {
-            p3 = project3DTo2D(nextSegment.centerX + nextSegment.width/2, (nextSegment.hasRamp ? nextSegment.rampHeight : 0), nextSegment.centerZ);
-            p4 = project3DTo2D(nextSegment.centerX - nextSegment.width/2, (nextSegment.hasRamp ? nextSegment.rampHeight : 0), nextSegment.centerZ);
-        }
+            let speedFactor = bike.speed * 0.08;
+            bike.x += Math.sin(bike.rotation) * speedFactor;
+            bike.z += Math.cos(bike.rotation) * speedFactor;
 
-        if (!p1 || !p2 || !p3 || !p4 || p1.scale <= 0) continue;
+            let currentSegIdx = Math.floor(bike.z / 12);
+            bike.currentSegmentIndex = currentSegIdx;
 
-        // Nếu là đoạn hố trống lơ lửng tách rời, bỏ qua không vẽ phần thân đường
-        if (segment.isFloating) {
-            if (segment.hasRamp) {
-                ctx.fillStyle = "#ffaa00"; // Đổ màu bệ phóng dốc bay màu cam rực rỡ
+            if (currentSegIdx >= trackSegments.length - 1) {
+                triggerWin();
+                return;
+            }
+
+            let activeSegment = trackSegments[Math.max(0, currentSegIdx)];
+            let targetFloorY = 0;
+
+            if (activeSegment) {
+                let distanceFromCenter = Math.abs(bike.x - activeSegment.centerX);
+                
+                if (activeSegment.isFloating && distanceFromCenter < activeSegment.width / 2) {
+                    targetFloorY = -999; 
+                } else if (distanceFromCenter > activeSegment.width / 2) {
+                    targetFloorY = -999; 
+                } else {
+                    targetFloorY = 0;
+                    if (activeSegment.hasRamp) targetFloorY = activeSegment.rampHeight; 
+                }
+            }
+
+            if (bike.y > targetFloorY || targetFloorY === -999) {
+                bike.airBorne = true;
+                bike.verticalVelocity -= 0.28; 
+                bike.y += bike.verticalVelocity;
+                
+                if (bike.y < -150) {
+                    triggerGameOver("Bạn đã hụt chân rơi tự do xuống vực sâu lơ lửng!");
+                }
+            } else {
+                bike.y = targetFloorY;
+                bike.verticalVelocity = 0;
+                bike.airBorne = false;
+
+                if (lastAirBorneState === true && targetFloorY !== -999) {
+                    bike.stamina = Math.min(bike.maxStamina, bike.stamina + 35);
+                }
+
+                if (activeSegment && activeSegment.hasRamp && bike.speed > 25) {
+                    bike.verticalVelocity = bike.speed * 0.12; 
+                    bike.airBorne = true;
+                }
+            }
+            lastAirBorneState = bike.airBorne;
+
+            if (activeSegment && targetFloorY !== -999) {
+                let distanceFromCenter = Math.abs(bike.x - activeSegment.centerX);
+                let wallThreshold = (activeSegment.width / 2) - 1.5;
+
+                if (distanceFromCenter >= wallThreshold) {
+                    if (Math.abs(bike.speed) > 18) { 
+                        triggerGameOver("Bạn chạy tốc độ cao đâm sầm vào tường chắn hai bên!");
+                        return;
+                    } else {
+                        bike.x = activeSegment.centerX + Math.sign(bike.x - activeSegment.centerX) * wallThreshold;
+                        bike.speed = 0; 
+                    }
+                }
+            }
+
+            if (activeSegment && activeSegment.hasObstacle) {
+                let distToObstacleX = Math.abs(bike.x - activeSegment.obstacleX);
+                if (distToObstacleX < 2.5 && !bike.airBorne) {
+                    triggerGameOver("Bạn đã va chạm trực diện vào khối chướng ngại vật!");
+                    return;
+                }
+            }
+                }
+                // ==========================================
+        // ĐỒ HỌA PHỐI CẢNH GIẢ LẬP 3D
+        // ==========================================
+        function drawFrame() {
+            ctx.fillStyle = getSkyColor();
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            drawSkyClouds(); 
+
+            let currentSegIdx = Math.floor(bike.z / 12);
+            let viewRange = 65; 
+
+            for (let i = viewRange; i >= -5; i--) {
+                let index = currentSegIdx + i;
+                if (index < 0 || index >= trackSegments.length) continue;
+
+                let segment = trackSegments[index];
+                
+                let p1 = project3DTo2D(segment.centerX - segment.width/2, (segment.hasRamp ? segment.rampHeight : 0), segment.centerZ);
+                let p2 = project3DTo2D(segment.centerX + segment.width/2, (segment.hasRamp ? segment.rampHeight : 0), segment.centerZ);
+                
+                let nextSegment = trackSegments[index + 1];
+                let p3, p4;
+                if (nextSegment) {
+                    p3 = project3DTo2D(nextSegment.centerX + nextSegment.width/2, (nextSegment.hasRamp ? nextSegment.rampHeight : 0), nextSegment.centerZ);
+                    p4 = project3DTo2D(nextSegment.centerX - nextSegment.width/2, (nextSegment.hasRamp ? nextSegment.rampHeight : 0), nextSegment.centerZ);
+                }
+
+                if (!p1 || !p2 || !p3 || !p4 || p1.scale <= 0) continue;
+
+                if (segment.isFloating) {
+                    if (segment.hasRamp) {
+                        ctx.fillStyle = "#ffaa00"; 
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+                        ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
+                        ctx.closePath(); ctx.fill();
+                    }
+                    continue; 
+                }
+
+                ctx.fillStyle = (index % 2 === 0) ? "#2a2a3e" : "#222235";
                 ctx.beginPath();
                 ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
                 ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
                 ctx.closePath(); ctx.fill();
+
+                ctx.lineWidth = Math.max(1, 4 * p1.scale);
+                ctx.strokeStyle = "#ff3366";
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y); ctx.lineTo(p4.x, p4.y);
+                ctx.moveTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y);
+                ctx.stroke();
+
+                if (segment.hasObstacle) {
+                    let obsP = project3DTo2D(segment.obstacleX, 0, segment.centerZ);
+                    if (obsP) {
+                        let obsSize = 16 * obsP.scale;
+                        ctx.fillStyle = "#e60000";
+                        ctx.fillRect(obsP.x - obsSize, obsP.y - obsSize * 2, obsSize * 2, obsSize * 2);
+                        ctx.strokeStyle = "#ffff00";
+                        ctx.strokeRect(obsP.x - obsSize, obsP.y - obsSize * 2, obsSize * 2, obsSize * 2);
+                    }
+                }
             }
-            continue; 
+
+            if (!bike.isFirstPerson) {
+                let bikeP = project3DTo2D(bike.x, bike.y, bike.z);
+                if (bikeP) {
+                    let bikeH = 35 * bikeP.scale;
+                    let bikeW = 14 * bikeP.scale;
+                    
+                    ctx.save();
+                    ctx.translate(bikeP.x, bikeP.y);
+                    
+                    ctx.fillStyle = "rgba(0,0,0,0.4)"; 
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, bikeW * 1.5, bikeW * 0.6, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = "#00ffcc"; 
+                    ctx.fillRect(-bikeW/2, -bikeH, bikeW, bikeH);
+                    
+                    ctx.fillStyle = "#111"; 
+                    ctx.beginPath();
+                    ctx.arc(-bikeW/3, -bikeH/4, bikeH/4, 0, Math.PI * 2);
+                    ctx.arc(bikeW/3, -bikeH/4, bikeH/4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.restore();
+                }
+            }
+
+            drawMinimap();
         }
 
-        // Đổ khối vẽ mặt phẳng đường đua đan xen màu kẻ ô
-        ctx.fillStyle = (index % 2 === 0) ? "#2a2a3e" : "#222235";
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
-        ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y);
-        ctx.closePath(); ctx.fill();
+        function project3DTo2D(worldX, worldY, worldZ) {
+            let camX = bike.x;
+            let camY = bike.y + 3.2; 
+            let camZ = bike.z - 16;  
 
-        // Vẽ 2 dải tường chắn bảo vệ Neon rực sáng dọc mép đường
-        ctx.lineWidth = Math.max(1, 4 * p1.scale);
-        ctx.strokeStyle = "#ff3366";
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y); ctx.lineTo(p4.x, p4.y);
-        ctx.moveTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y);
-        ctx.stroke();
-
-        // Khởi dựng hình khối vẽ Chướng ngại vật nguy hiểm nếu có
-        if (segment.hasObstacle) {
-            let obsP = project3DTo2D(segment.obstacleX, 0, segment.centerZ);
-            if (obsP) {
-                let obsSize = 16 * obsP.scale;
-                ctx.fillStyle = "#e60000";
-                ctx.fillRect(obsP.x - obsSize, obsP.y - obsSize * 2, obsSize * 2, obsSize * 2);
-                ctx.strokeStyle = "#ffff00";
-                ctx.strokeRect(obsP.x - obsSize, obsP.y - obsSize * 2, obsSize * 2, obsSize * 2);
+            if (bike.isFirstPerson) {
+                camX = bike.x;
+                camY = bike.y + 1.9; 
+                camZ = bike.z + 1.2;  
             }
-        }
-    }
 
-    // Vẽ mô hình chiếc xe đạp (Chỉ hiển thị khi đang bật Góc nhìn thứ 3)
-    if (!bike.isFirstPerson) {
-        let bikeP = project3DTo2D(bike.x, bike.y, bike.z);
-        if (bikeP) {
-            let bikeH = 35 * bikeP.scale;
-            let bikeW = 14 * bikeP.scale;
+            let relativeZ = worldZ - camZ;
+            if (relativeZ <= 0.5) return null; 
+
+            let relativeX = worldX - camX;
+            let relativeY = worldY - camY;
+
+            let rot = -bike.rotation;
+            let rx = relativeX * Math.cos(rot) - relativeZ * Math.sin(rot);
+            let rz = relativeX * Math.sin(rot) + relativeZ * Math.cos(rot);
+
+            if (rz <= 1) return null;
+
+            let fov = 420; 
+            let scale = fov / rz;
             
+            let screenX = (canvas.width / 2) + rx * scale;
+            let screenY = (canvas.height / 2) - relativeY * scale;
+
+            return { x: screenX, y: screenY, scale: scale };
+        }
+
+        function getSkyColor() {
+            if (currentLevel % 3 === 1) return "#0f1026"; 
+            if (currentLevel % 3 === 2) return "#42183b"; 
+            return "#122736"; 
+        }
+
+        function drawSkyClouds() {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+            for (let i = 0; i < 5; i++) {
+                let cloudX = ((Date.now() * 0.015 + i * 250) % (canvas.width + 200)) - 100;
+                ctx.beginPath();
+                ctx.arc(cloudX, 80 + i * 20, 40, 0, Math.PI * 2);
+                ctx.arc(cloudX + 30, 70 + i * 20, 50, 0, Math.PI * 2);
+                ctx.arc(cloudX + 70, 85 + i * 20, 35, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawMinimap() {
+            let mapSize = 130; 
+            let mapX = 25;     
+            let mapY = 25;
+
+            ctx.fillStyle = "rgba(10, 10, 25, 0.75)";
+            ctx.beginPath();
+            ctx.arc(mapX + mapSize/2, mapY + mapSize/2, mapSize/2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#4a4a75";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            let centerX = mapX + mapSize / 2;
+            let centerY = mapY + mapSize / 2;
+
+            ctx.strokeStyle = "rgba(0, 255, 204, 0.45)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            let totalSegs = trackSegments.length;
+            for (let i = 0; i < totalSegs; i += 3) {
+                let seg = trackSegments[i];
+                let diffZ = seg.centerZ - bike.z;
+                let diffX = seg.centerX - bike.x;
+
+                let drawX = centerX + diffX * 0.3;
+                let drawY = centerY - diffZ * 0.04;
+
+                let distFromCenter = Math.hypot(drawX - centerX, drawY - centerY);
+                if (distFromCenter < mapSize / 2 - 4) {
+                    if (i === 0) ctx.moveTo(drawX, drawY);
+                    else ctx.lineTo(drawX, drawY);
+                }
+            }
+            ctx.stroke();
+
             ctx.save();
-            ctx.translate(bikeP.x, bikeP.y);
-            
-            ctx.fillStyle = "rgba(0,0,0,0.4)"; // Đổ bóng xe dưới mặt đường
-            ctx.beginPath();
-            ctx.ellipse(0, 0, bikeW * 1.5, bikeW * 0.6, 0, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(bike.rotation); 
 
-            ctx.fillStyle = "#00ffcc"; // Màu thân xe thể thao
-            ctx.fillRect(-bikeW/2, -bikeH, bikeW, bikeH);
-            
-            ctx.fillStyle = "#111"; // Vẽ cấu trúc bánh xe hình tròn đơn giản
+            ctx.fillStyle = "#ff3366"; 
             ctx.beginPath();
-            ctx.arc(-bikeW/3, -bikeH/4, bikeH/4, 0, Math.PI * 2);
-            ctx.arc(bikeW/3, -bikeH/4, bikeH/4, 0, Math.PI * 2);
-            ctx.fill();
-
+            ctx.moveTo(0, -9);   
+            ctx.lineTo(-5, 7);   
+            ctx.lineTo(5, 7);    
+            ctx.closePath(); ctx.fill();
             ctx.restore();
         }
-    }
 
-    // Kích hoạt vẽ Bản đồ thu nhỏ Mini-map kèm Kim mũi tên xoay 360 độ góc trái trên cùng
-    drawMinimap();
-}
+        function updateHUD() {
+            document.getElementById('hudLevel').innerText = currentLevel;
+            document.getElementById('hudSpeed').innerText = Math.floor(Math.abs(bike.speed)) + " km/h";
+            document.getElementById('hudMaxSpeed').innerText = maxSpeed + " km/h";
+            
+            let currentKm = ((bike.z / 12) / (trackSegments.length) * trackLength).toFixed(2);
+            document.getElementById('hudProgress').innerText = Math.min(trackLength, Math.max(0, currentKm)) + " / " + trackLength + " km";
 
-// Thuật toán chiếu ma trận phối cảnh biến góc xoay không gian tự do 360 độ
-function project3DTo2D(worldX, worldY, worldZ) {
-    let camX = bike.x;
-    let camY = bike.y + 3.2; 
-    let camZ = bike.z - 16;  
-
-    // Điều chỉnh tọa độ luân chuyển vị trí ống kính mắt nhìn nếu là Góc Nhìn Thứ Nhất (1st Person POV)
-    if (bike.isFirstPerson) {
-        camX = bike.x;
-        camY = bike.y + 1.9; 
-        camZ = bike.z + 1.2;  
-    }
-
-    let relativeZ = worldZ - camZ;
-    if (relativeZ <= 0.5) return null; 
-
-    let relativeX = worldX - camX;
-    let relativeY = worldY - camY;
-
-    let rot = -bike.rotation;
-    let rx = relativeX * Math.cos(rot) - relativeZ * Math.sin(rot);
-    let rz = relativeX * Math.sin(rot) + relativeZ * Math.cos(rot);
-
-    if (rz <= 1) return null;
-
-    let fov = 420; 
-    let scale = fov / rz;
-    
-    let screenX = (canvas.width / 2) + rx * scale;
-    let screenY = (canvas.height / 2) - relativeY * scale;
-
-    return { x: screenX, y: screenY, scale: scale };
-}
-
-function getSkyColor() {
-    if (currentLevel % 3 === 1) return "#0f1026"; 
-    if (currentLevel % 3 === 2) return "#42183b"; 
-    return "#122736"; 
-}
-
-function drawSkyClouds() {
-    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-    for (let i = 0; i < 5; i++) {
-        let cloudX = ((Date.now() * 0.015 + i * 250) % (canvas.width + 200)) - 100;
-        ctx.beginPath();
-        ctx.arc(cloudX, 80 + i * 20, 40, 0, Math.PI * 2);
-        ctx.arc(cloudX + 30, 70 + i * 20, 50, 0, Math.PI * 2);
-        ctx.arc(cloudX + 70, 85 + i * 20, 35, 0, Math.PI * 2);
-        ctx.fill();
-    }
-}
-
-// Thiết kế Bản đồ rada radar mini-map góc trái màn hình tích hợp mũi tên định hướng xoay 360°
-function drawMinimap() {
-    let mapSize = 130; 
-    let mapX = 25;     
-    let mapY = 25;
-
-    ctx.fillStyle = "rgba(10, 10, 25, 0.75)";
-    ctx.beginPath();
-    ctx.arc(mapX + mapSize/2, mapY + mapSize/2, mapSize/2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#4a4a75";
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    let centerX = mapX + mapSize / 2;
-    let centerY = mapY + mapSize / 2;
-
-    ctx.strokeStyle = "rgba(0, 255, 204, 0.45)";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-
-    let totalSegs = trackSegments.length;
-    for (let i = 0; i < totalSegs; i += 3) {
-        let seg = trackSegments[i];
-        let diffZ = seg.centerZ - bike.z;
-        let diffX = seg.centerX - bike.x;
-
-        let drawX = centerX + diffX * 0.3;
-        let drawY = centerY - diffZ * 0.04;
-
-        let distFromCenter = Math.hypot(drawX - centerX, drawY - centerY);
-        if (distFromCenter < mapSize / 2 - 4) {
-            if (i === 0) ctx.moveTo(drawX, drawY);
-            else ctx.lineTo(drawX, drawY);
+            let pct = (bike.stamina / bike.maxStamina) * 100;
+            document.getElementById('boostBar').style.width = pct + "%";
         }
-    }
-    ctx.stroke();
 
-    // Vẽ kim chỉ hướng tam giác xoay đồng bộ theo hướng xe đang rẽ
-    ctx.save();
-    ctx.translate(centerX, centerY);
-    ctx.rotate(bike.rotation); 
+        function triggerGameOver(reason) {
+            gameState = "GAMEOVER";
+            document.getElementById('screenTitle').innerText = "GAME OVER";
+            document.getElementById('screenTitle').style.color = "#ff3333";
+            document.getElementById('screenDesc').innerText = reason;
+            document.getElementById('screenBtn').innerText = "Thử lại";
+            document.getElementById('screenOverlay').classList.add('active');
+        }
 
-    ctx.fillStyle = "#ff3366"; 
-    ctx.beginPath();
-    ctx.moveTo(0, -9);   
-    ctx.lineTo(-5, 7);   
-    ctx.lineTo(5, 7);    
-    ctx.closePath(); ctx.fill();
-    ctx.restore();
-}
+        function triggerWin() {
+            gameState = "WIN";
+            document.getElementById('screenTitle').innerText = "CHIẾN THẮNG MÀN " + currentLevel;
+            document.getElementById('screenTitle').style.color = "#00ffcc";
+            document.getElementById('screenDesc').innerText = "Tốc độ đỉnh cao! Sẵn sàng chinh phục màn tiếp theo chưa?";
+            document.getElementById('screenBtn').innerText = "Tiến vào Màn " + (currentLevel + 1);
+            document.getElementById('screenOverlay').classList.add('active');
+        }
 
-function updateHUD() {
-    document.getElementById('hudLevel').innerText = currentLevel;
-    document.getElementById('hudSpeed').innerText = Math.floor(Math.abs(bike.speed)) + " km/h";
-    document.getElementById('hudMaxSpeed').innerText = maxSpeed + " km/h";
-    
-    let currentKm = ((bike.z / 12) / (trackSegments.length) * trackLength).toFixed(2);
-    document.getElementById('hudProgress').innerText = Math.min(trackLength, Math.max(0, currentKm)) + " / " + trackLength + " km";
+        function handleScreenButtonClick() {
+            if (gameState === "GAMEOVER") {
+                initLevel(currentLevel); 
+            } else if (gameState === "WIN") {
+                initLevel(currentLevel + 1); 
+            }
+        }
 
-    let pct = (bike.stamina / bike.maxStamina) * 100;
-    document.getElementById('boostBar').style.width = pct + "%";
-}
+        function gameLoop() {
+            updatePhysics();
+            drawFrame();
+            updateHUD();
+            requestAnimationFrame(gameLoop);
+        }
 
-// ==========================================
-// QUẢN LÝ TRẠNG THÁI THUA / THẮNG / VÒNG LẶP CORE
-// ==========================================
-function triggerGameOver(reason) {
-    gameState = "GAMEOVER";
-    document.getElementById('screenTitle').innerText = "GAME OVER";
-    document.getElementById('screenTitle').style.color = "#ff3333";
-    document.getElementById('screenDesc').innerText = reason;
-    document.getElementById('screenBtn').innerText = "Thử lại";
-    document.getElementById('screenOverlay').classList.add('active');
-}
-
-function triggerWin() {
-    gameState = "WIN";
-    document.getElementById('screenTitle').innerText = "CHIẾN THẮNG MÀN " + currentLevel;
-    document.getElementById('screenTitle').style.color = "#00ffcc";
-    document.getElementById('screenDesc').innerText = "Tốc độ đỉnh cao! Sẵn sàng chinh phục màn tiếp theo chưa?";
-    document.getElementById('screenBtn').innerText = "Tiến vào Màn " + (currentLevel + 1);
-    document.getElementById('screenOverlay').classList.add('active');
-}
-
-function handleScreenButtonClick() {
-    if (gameState === "GAMEOVER") {
-        initLevel(currentLevel); 
-    } else if (gameState === "WIN") {
-        initLevel(currentLevel + 1); 
-    }
-}
-
-function gameLoop() {
-    updatePhysics();
-    drawFrame();
-    updateHUD();
-    requestAnimationFrame(gameLoop);
-}
-
-// Kích hoạt khởi động hệ thống game lập tức
-initLevel(1);
-gameLoop();
-        
+        initLevel(1);
+        gameLoop();
+    </script>
+</body>
+</html>
